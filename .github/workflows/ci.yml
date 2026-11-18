@@ -2,7 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # alt/** are alternative implementations of the same API; keep them green too
+    branches: [main, "alt/**"]
   pull_request:
     # labeled/unlabeled so adding the override label re-runs the gate
     types: [opened, synchronize, reopened, labeled, unlabeled]

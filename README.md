@@ -54,6 +54,24 @@ The PRs stay open on purpose. They're living examples, not changes to merge.
 To see the escape hatch, add the `api-breaking-change-approved` label to #2: the gate
 turns green, but the breaks are still reported as warnings.
 
+## Same change, three implementations
+
+The contracts and CI gates don't care *how* the versions are built in code. Two
+alternative branches serve the **same** v1 and v2 as `main`. Each has a PR that makes
+the same breaking change as #6 (v3: `POST /orders` requires an `Idempotency-Key`
+header), so you can compare what changing the API looks like in each style:
+
+| Approach | Where the version differences live | Branch | Same v3 change |
+|---|---|---|---|
+| **Separate modules** + `inherit_routes` | `api/v1/`, `api/v2/`: one thin layer per version | `main` | [#6](https://github.com/sspeaks/api-versioning-demo/pull/6) |
+| **Single source**, Stripe-style ([Cadwyn](https://github.com/zmievsa/cadwyn)) | Latest code only, plus `api/versions.py`: one class per breaking change | [`alt/single-source-cadwyn`](https://github.com/sspeaks/api-versioning-demo/tree/alt/single-source-cadwyn) | [#8](https://github.com/sspeaks/api-versioning-demo/pull/8) |
+| **Tagged handlers** + `if` | One `routes.py`. Each handler is tagged with the versions it serves | [`alt/tagged-handlers`](https://github.com/sspeaks/api-versioning-demo/tree/alt/tagged-handlers) | [#9](https://github.com/sspeaks/api-versioning-demo/pull/9) |
+
+All three generate the same `openapi/v3.json`, so the bot comments match. Only the code differs.
+Each branch has a doc with its trade-offs:
+[single-source-versioning.md](https://github.com/sspeaks/api-versioning-demo/blob/alt/single-source-cadwyn/docs/single-source-versioning.md),
+[tagged-handlers.md](https://github.com/sspeaks/api-versioning-demo/blob/alt/tagged-handlers/docs/tagged-handlers.md).
+
 ## Try it locally
 
 Requires [uv](https://docs.astral.sh/uv/).
@@ -142,14 +160,6 @@ You don't need everything on day one:
 
 ## Alternatives worth knowing
 
-* **Single-source versioning (Stripe-style)**: [Cadwyn](https://github.com/zmievsa/cadwyn)
-  lets you write only the latest schemas plus small migrations that convert
-  requests and responses for older versions. **See the
-  [`alt/single-source-cadwyn`](https://github.com/sspeaks/api-versioning-demo/tree/alt/single-source-cadwyn)
-  branch**: it serves the same v1/v2 from one set of files, with every version
-  difference in a single `versions.py`, and the same CI gates prove nothing broke. Its
-  [trade-offs doc](https://github.com/sspeaks/api-versioning-demo/blob/alt/single-source-cadwyn/docs/single-source-versioning.md)
-  compares the two approaches.
 * **Consumer-driven contract testing** ([Pact](https://docs.pact.io/)): consumers publish
   their expectations and providers verify against them. It's a heavier version of
   `tests/consumers/`.
