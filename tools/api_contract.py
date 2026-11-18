@@ -377,11 +377,31 @@ def cmd_breaking(args: argparse.Namespace) -> int:
 # --------------------------------------------------------------------------- #
 # changelog (markdown for PR comments)
 # --------------------------------------------------------------------------- #
+NOISE = (
+    "# API Changelog",
+    "## API Changes",
+    "No changes detected",
+    "No changes to report",
+    "Run 'oasdiff diff'",
+)
+LIFECYCLE_KEYS = ("status", "sunset", "successor")
+
+
+def lifecycle_changes(before: dict, after: dict) -> str:
+    """e.g. "Lifecycle: status `stable` → `deprecated`, sunset `None` → `2027-06-30`"."""
+    changed = [
+        f"{key} `{before.get(key)}` → `{after.get(key)}`"
+        for key in LIFECYCLE_KEYS
+        if before.get(key) != after.get(key)
+    ]
+    return "\nLifecycle: " + ", ".join(changed) if changed else ""
+
+
 def tidy_changelog(markdown: str) -> str:
     """Drop oasdiff's top-level headings and blank-line padding so it nests in a comment."""
     lines = []
     for line in markdown.splitlines():
-        if line.startswith(("# API Changelog", "## API Changes", "No changes detected")):
+        if line.startswith(NOISE):
             continue
         if line.startswith("### "):
             line = "**" + line[4:].strip() + "**"
@@ -437,9 +457,7 @@ def cmd_changelog(args: argparse.Namespace) -> int:
             if base_spec is None:
                 continue
             status = base_registry[version]["status"]
-            lifecycle = ""
-            if head_registry[version] != base_registry[version]:
-                lifecycle = f"\nLifecycle: `{status}` → `{head_registry[version]['status']}`"
+            lifecycle = lifecycle_changes(base_registry[version], head_registry[version])
             proc = run_oasdiff(
                 "changelog", base_spec, service.spec_path(version), "--format", "markdown"
             )

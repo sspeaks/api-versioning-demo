@@ -63,3 +63,16 @@ def test_removing_deprecated_before_sunset_is_blocked():
 
 def test_removing_deprecated_after_sunset_is_fine():
     assert removed({"status": "deprecated", "sunset": "2026-11-01"}) == []
+
+
+def test_changelog_reports_only_lifecycle_fields():
+    base = {"app": "a:app", "status": "stable"}
+    assert ac.lifecycle_changes(base, {**base, "app": "b:app"}) == ""
+    assert ac.lifecycle_changes(base, {**base, "status": "deprecated", "sunset": "2027-06-30"}) == (
+        "\nLifecycle: status `stable` → `deprecated`, sunset `None` → `2027-06-30`"
+    )
+
+
+def test_tidy_changelog_drops_oasdiff_noise():
+    noise = "No changes to report, but the specs are different.\nRun 'oasdiff diff' to see more.\n"
+    assert ac.tidy_changelog(noise) == ""
