@@ -326,9 +326,11 @@ def cmd_breaking(args: argparse.Namespace) -> int:
             has_errors, has_warnings = 3 in levels, 2 in levels
 
             display = run_oasdiff("breaking", base_spec, spec, "--format", fmt).stdout.strip()
-            if status not in FROZEN_STATUSES and IN_GITHUB_ACTIONS:
+            if IN_GITHUB_ACTIONS and status not in FROZEN_STATUSES:
                 # beta: report only, don't let oasdiff emit ::error annotations.
                 display = display.replace("::error", "::notice").replace("::warning", "::notice")
+            elif IN_GITHUB_ACTIONS and args.allow_breaking:
+                display = display.replace("::error", "::warning")
             print(display or "No breaking changes.")
 
             if not has_errors:

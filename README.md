@@ -43,13 +43,15 @@ Each PR is a scenario. Open it, look at the checks, the inline annotations and t
 
 | PR | Scenario | Result | What to look at |
 |---|---|---|---|
-| _#1_ | Add an optional `notes` field to v2 | ✅ passes | Bot comment lists the additive change; API owners auto-requested via CODEOWNERS |
-| _#2_ | Rename `customer_name` → `customer` in **v1** | ❌ breaking-change gate | oasdiff annotations on `openapi/v1.json`, one per affected endpoint |
-| _#3_ | Add a field to v2 but forget `make openapi` | ❌ drift gate | "spec does not match the code, run `make openapi`" |
-| _#4_ | Refactor how the domain stores money (Decimal → integer cents) | ✅ passes | Big internal diff, **zero** contract diff. The mappers absorbed it |
-| _#5_ | v1 `total_cents` accidentally returns dollars | ❌ consumer golden test | Contract gates are green; only the golden test catches it |
+| [#1](https://github.com/sspeaks/api-versioning-demo/pull/1) | Add an optional `notes` field to v2 | ✅ passes | Bot comment lists the additive change; API owners auto-requested via CODEOWNERS |
+| [#2](https://github.com/sspeaks/api-versioning-demo/pull/2) | Rename `customer_name` → `customer` in **v1** | ❌ breaking-change gate | oasdiff annotations on `openapi/v1.json`, one per affected endpoint |
+| [#3](https://github.com/sspeaks/api-versioning-demo/pull/3) | Add a field to v2 but forget `make openapi` | ❌ drift gate | "spec does not match the code, run `make openapi`" |
+| [#4](https://github.com/sspeaks/api-versioning-demo/pull/4) | Refactor how the domain stores money (Decimal → integer cents) | ✅ passes | Big internal diff, **zero** contract diff. The mappers absorbed it |
+| [#5](https://github.com/sspeaks/api-versioning-demo/pull/5) | v1 `total_cents` accidentally returns dollars | ❌ consumer golden test | Contract gates are green; only the golden test catches it |
 
-<!-- demo-pr-links -->
+The PRs stay open on purpose. They're living examples, not changes to merge.
+To see the escape hatch, add the `api-breaking-change-approved` label to #2: the gate
+turns green, but the breaks are still reported as warnings.
 
 ## Try it locally
 
