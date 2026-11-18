@@ -48,6 +48,7 @@ Each PR is a scenario. Open it, look at the checks, the inline annotations and t
 | [#3](https://github.com/sspeaks/api-versioning-demo/pull/3) | Add a field to v2 but forget `make openapi` | ❌ drift gate | "spec does not match the code, run `make openapi`" |
 | [#4](https://github.com/sspeaks/api-versioning-demo/pull/4) | Refactor how the domain stores money (Decimal → integer cents) | ✅ passes | Big internal diff, **zero** contract diff. The mappers absorbed it |
 | [#5](https://github.com/sspeaks/api-versioning-demo/pull/5) | v1 `total_cents` accidentally returns dollars | ❌ consumer golden test | Contract gates are green; only the golden test catches it |
+| [#6](https://github.com/sspeaks/api-versioning-demo/pull/6) | Breaking change shipped as **v3**: only `POST /orders` changes | ✅ passes | v3 is about 60 lines: one endpoint, the rest inherited from v2. The bot describes v3 as one change from v2 |
 
 The PRs stay open on purpose. They're living examples, not changes to merge.
 To see the escape hatch, add the `api-breaking-change-approved` label to #2: the gate
@@ -140,10 +141,14 @@ You don't need everything on day one:
 
 ## Alternatives worth knowing
 
-* **Date/header versioning (Stripe-style)**: [Cadwyn](https://github.com/zmievsa/cadwyn)
+* **Single-source versioning (Stripe-style)**: [Cadwyn](https://github.com/zmievsa/cadwyn)
   lets you write only the latest schemas plus small migrations that convert
-  requests and responses for older versions. Powerful once you have many versions.
-  The same drift and breaking gates still apply.
+  requests and responses for older versions. **See the
+  [`alt/single-source-cadwyn`](https://github.com/sspeaks/api-versioning-demo/tree/alt/single-source-cadwyn)
+  branch**: it serves the same v1/v2 from one set of files, with every version
+  difference in a single `versions.py`, and the same CI gates prove nothing broke. Its
+  [trade-offs doc](https://github.com/sspeaks/api-versioning-demo/blob/alt/single-source-cadwyn/docs/single-source-versioning.md)
+  compares the two approaches.
 * **Consumer-driven contract testing** ([Pact](https://docs.pact.io/)): consumers publish
   their expectations and providers verify against them. It's a heavier version of
   `tests/consumers/`.
