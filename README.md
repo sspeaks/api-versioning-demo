@@ -78,7 +78,7 @@ header), so you can compare what changing the API looks like in each style:
 | **Single source**, Stripe-style ([Cadwyn](https://github.com/zmievsa/cadwyn)) | Latest code only, plus `api/versions.py`: one class per breaking change | [`alt/single-source-cadwyn`](https://github.com/sspeaks/api-versioning-demo/tree/alt/single-source-cadwyn) | [#8](https://github.com/sspeaks/api-versioning-demo/pull/8) |
 | **Tagged handlers** + `if` | One `routes.py`. Each handler is tagged with the versions it serves | [`alt/tagged-handlers`](https://github.com/sspeaks/api-versioning-demo/tree/alt/tagged-handlers) | [#9](https://github.com/sspeaks/api-versioning-demo/pull/9) |
 
-All three generate the same `openapi/v3.json`, so the bot comments match. Only the code differs.
+All three publish the same v3 contract, so the bot comments match. Only the code differs.
 Each branch has a doc with its trade-offs:
 [single-source-versioning.md](https://github.com/sspeaks/api-versioning-demo/blob/alt/single-source-cadwyn/docs/single-source-versioning.md),
 [tagged-handlers.md](https://github.com/sspeaks/api-versioning-demo/blob/alt/tagged-handlers/docs/tagged-handlers.md).
