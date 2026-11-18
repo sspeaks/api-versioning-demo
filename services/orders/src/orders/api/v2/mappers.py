@@ -27,4 +27,5 @@ def order_to_v2(order: Order) -> schemas.Order:
         total=money(order.total, order.currency),
         status=order.status.value,
         created_at=order.created_at,
+        notes=order.notes,
     )

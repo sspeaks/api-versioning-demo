@@ -33,6 +33,18 @@
             "minItems": 1,
             "title": "Items",
             "type": "array"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
           }
         },
         "required": [
@@ -133,6 +145,18 @@
             },
             "title": "Items",
             "type": "array"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Delivery notes from the customer.",
+            "title": "Notes"
           },
           "status": {
             "enum": [

@@ -51,7 +51,9 @@ def get_order(order_id: int, repo: Repo) -> schemas.Order:
 def create_order(body: schemas.CreateOrderRequest, repo: Repo) -> schemas.Order:
     try:
         customer = repo.get_customer(body.customer_id)
-        order = repo.create_order(customer, [(i.sku, i.quantity) for i in body.items])
+        order = repo.create_order(
+            customer, [(i.sku, i.quantity) for i in body.items], notes=body.notes
+        )
     except UnknownCustomer:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "unknown customer_id") from None
     except UnknownSku as exc:
