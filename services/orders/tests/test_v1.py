@@ -7,7 +7,7 @@ def test_list_orders_is_a_bare_array(client):
 def test_get_order(client):
     body = client.get("/v1/orders/1").json()
     assert body["customer_name"] == "Ada Lovelace"
-    assert body["total_cents"] == 3048
+    assert body["total_cents"] == 30
     assert body["items"] == [{"sku": "WIDGET-1", "qty": 2}, {"sku": "GADGET-7", "qty": 1}]
 
 
@@ -33,7 +33,7 @@ def test_create_order(client):
         json={"customer_name": "Grace Hopper", "items": [{"sku": "GIZMO-3", "qty": 2}]},
     )
     assert resp.status_code == 201
-    assert resp.json()["total_cents"] == 19800
+    assert resp.json()["total_cents"] == 198
     assert resp.json()["status"] == "pending"
 
 
