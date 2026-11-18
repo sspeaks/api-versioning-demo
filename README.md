@@ -109,6 +109,7 @@ make openapi && make breaking     # ❌ response-required-property-removed ...
 ```
 
 The policy is in **[docs/api-versioning-policy.md](docs/api-versioning-policy.md)**.
+For a researched, cited survey of *all* the versioning approaches ranked by engineering-speed cost, see **[docs/api-versioning-approaches.md](docs/api-versioning-approaches.md)**.
 
 ## Design choices (and why)
 
