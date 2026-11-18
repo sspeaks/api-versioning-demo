@@ -26,3 +26,8 @@ successor = "v2"
 app = "orders.main:app"
 openapi_url = "/openapi.json?version=v2"
 status = "stable"
+
+[versions.v3]
+app = "orders.main:app"
+openapi_url = "/openapi.json?version=v3"
+status = "beta"

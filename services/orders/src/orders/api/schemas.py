@@ -69,5 +69,16 @@ class CreateOrderRequest(BaseModel):
     items: list[CreateOrderItem] = Field(min_length=1)
 
 
+class CreateOrderHeaders(BaseModel):
+    """Headers of POST /orders."""
+
+    idempotency_key: str = Field(
+        alias="Idempotency-Key",
+        min_length=8,
+        description="Unique per logical order. Retrying with the same key returns "
+        "the original order instead of creating a new one.",
+    )
+
+
 class Error(BaseModel):
     detail: str

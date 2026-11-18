@@ -11,7 +11,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from cadwyn import VersionedAPIRouter
-from fastapi import HTTPException, Query, status
+from fastapi import Header, HTTPException, Query, status
 
 from orders.api import schemas
 from orders.api.deps import Repo
@@ -59,10 +59,18 @@ def get_order(order_id: int, repo: Repo) -> schemas.Order:
     responses={400: {"model": schemas.Error}},
     operation_id="createOrder",
 )
-def create_order(body: schemas.CreateOrderRequest, repo: Repo) -> schemas.Order:
+def create_order(
+    body: schemas.CreateOrderRequest,
+    repo: Repo,
+    headers: Annotated[schemas.CreateOrderHeaders, Header()],
+) -> schemas.Order:
     try:
         customer = repo.get_customer(body.customer_id)
-        order = repo.create_order(customer, [(i.sku, i.quantity) for i in body.items])
+        order = repo.create_order(
+            customer,
+            [(i.sku, i.quantity) for i in body.items],
+            idempotency_key=headers.idempotency_key,
+        )
     except UnknownCustomer:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "unknown customer_id") from None
     except UnknownSku as exc:
