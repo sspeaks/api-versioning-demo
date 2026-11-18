@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import HTTPException, Query, status
+from fastapi import Header, HTTPException, Query, status
 
 from orders.api.deps import Repo
 from orders.api.v1 import schemas as v1
@@ -102,10 +102,29 @@ def create_order_v1(body: v1.CreateOrderRequest, repo: Repo):
     responses={400: {"model": v2.Error}},
     operation_id="createOrder",
 )
-def create_order(body: v2.CreateOrderRequest, repo: Repo):
+def create_order(
+    body: v2.CreateOrderRequest,
+    repo: Repo,
+    # v3's one breaking change. v2 doesn't have this parameter (so its contract is
+    # unchanged) and the handler gets None for v2 requests.
+    idempotency_key: Annotated[
+        str,
+        Header(
+            alias="Idempotency-Key",
+            min_length=8,
+            description="Unique per logical order. Retrying with the same key returns "
+            "the original order instead of creating a new one.",
+        ),
+        since("v3"),
+    ],
+):
     try:
         customer = repo.get_customer(body.customer_id)
-        order = repo.create_order(customer, [(i.sku, i.quantity) for i in body.items])
+        order = repo.create_order(
+            customer,
+            [(i.sku, i.quantity) for i in body.items],
+            idempotency_key=idempotency_key,
+        )
     except UnknownCustomer:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "unknown customer_id") from None
     except UnknownSku as exc:
