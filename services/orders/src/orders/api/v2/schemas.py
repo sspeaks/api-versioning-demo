@@ -46,6 +46,7 @@ class Order(BaseModel):
     total: Money
     status: Literal["pending", "paid", "shipped", "cancelled"]
     created_at: datetime
+    notes: str | None = Field(default=None, description="Delivery notes from the customer.")
 
 
 class OrderPage(BaseModel):
@@ -63,6 +64,7 @@ class CreateOrderItem(BaseModel):
 class CreateOrderRequest(BaseModel):
     customer_id: int
     items: list[CreateOrderItem] = Field(min_length=1)
+    notes: str | None = Field(default=None, max_length=500)
 
 
 class Error(BaseModel):

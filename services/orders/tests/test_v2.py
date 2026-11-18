@@ -43,3 +43,16 @@ def test_create_order_unknown_customer(client):
     )
     assert resp.status_code == 400
     assert resp.json() == {"detail": "unknown customer_id"}
+
+
+def test_create_order_with_notes(client):
+    resp = client.post(
+        "/v2/orders",
+        json={
+            "customer_id": 1,
+            "items": [{"sku": "WIDGET-1", "quantity": 1}],
+            "notes": "Leave at the back door",
+        },
+    )
+    assert resp.status_code == 201
+    assert resp.json()["notes"] == "Leave at the back door"

@@ -54,7 +54,9 @@ class OrderRepository:
     def get_order(self, order_id: int) -> Order | None:
         return self._orders.get(order_id)
 
-    def create_order(self, customer: Customer, items: list[tuple[str, int]]) -> Order:
+    def create_order(
+        self, customer: Customer, items: list[tuple[str, int]], notes: str | None = None
+    ) -> Order:
         lines = []
         for sku, quantity in items:
             if sku not in CATALOG:
@@ -67,6 +69,7 @@ class OrderRepository:
             currency="USD",
             status=OrderStatus.PENDING,
             created_at=datetime.now(timezone.utc),
+            notes=notes,
         )
         self._orders[order.id] = order
         return order

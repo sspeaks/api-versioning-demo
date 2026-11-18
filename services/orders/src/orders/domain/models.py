@@ -45,6 +45,7 @@ class Order:
     # copy fields explicitly instead of dumping the whole object.
     fraud_score: float = 0.0
     tags: list[str] = field(default_factory=list)
+    notes: str | None = None
 
     @property
     def total(self) -> Decimal:
