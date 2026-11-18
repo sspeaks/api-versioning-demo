@@ -1,5 +1,13 @@
 # API versioning demo: FastAPI + pydantic + CI enforcement
 
+> **🏷️ You're on the `alt/tagged-handlers` branch.** It serves the *same* v1 and v2
+> APIs as `main` (the generated specs are byte-for-byte identical), but every handler
+> lives once in [`api/routes.py`](services/orders/src/orders/api/routes.py), tagged with
+> the versions it serves, with an `if` where versions differ. The contracts stay one
+> module per version. **Read [docs/tagged-handlers.md](docs/tagged-handlers.md)** for the
+> walkthrough and trade-offs, and [PR #9](https://github.com/sspeaks/api-versioning-demo/pull/9)
+> for what a breaking change (v3) looks like here. The demo PRs #1–#5 target `main`'s layout.
+
 A small monorepo-shaped example of how to **stabilize public APIs** so external
 consumers can rely on them while the code behind them keeps changing fast.
 
@@ -115,8 +123,11 @@ make openapi && make breaking     # ❌ response-required-property-removed ...
 │   ├── openapi/{v1,v2}.json          # ⭐ committed contracts (generated, never hand-edited)
 │   ├── src/orders/
 │   │   ├── domain/                   # internal model: change freely
-│   │   ├── api/v1/{schemas,mappers,routes}.py
-│   │   ├── api/v2/{schemas,mappers,routes}.py
+│   │   ├── api/v1/{schemas,mappers}.py    # each version's contract
+│   │   ├── api/v2/{schemas,mappers}.py
+│   │   ├── api/routes.py             # ⭐ every handler, tagged with the versions it serves
+│   │   ├── api/apps.py               # one app per version, built from the tags
+│   │   ├── versioned_router.py       # the tagging mechanism (plain FastAPI)
 │   │   ├── versioning.py             # sub-app per version, deprecation headers, x-sunset
 │   │   └── main.py                   # mounts /v1 and /v2
 │   └── tests/consumers/              # ⭐ golden payloads that named consumers rely on

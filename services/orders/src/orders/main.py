@@ -1,9 +1,10 @@
 """Root ASGI app: mounts every public API version listed in api-versions.toml.
 
-    /v1/...  -> orders.api.v1:app   (docs at /v1/docs)
-    /v2/...  -> orders.api.v2:app   (docs at /v2/docs)
+    /v1/...  -> orders.api.apps:v1   (docs at /v1/docs)
+    /v2/...  -> orders.api.apps:v2   (docs at /v2/docs)
 
-Adding a version means adding a registry entry and a package. This file doesn't change.
+Adding a version means adding a registry entry and a line in api/apps.py.
+This file doesn't change.
 
 Run with:  uv run uvicorn orders.main:app --reload
 """

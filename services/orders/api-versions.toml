@@ -13,11 +13,11 @@
 # Changes to this file require API-owner review (see .github/CODEOWNERS).
 
 [versions.v1]
-app = "orders.api.v1:app"
+app = "orders.api.apps:v1"
 status = "deprecated"
 sunset = "2027-06-30"
 successor = "v2"
 
 [versions.v2]
-app = "orders.api.v2:app"
+app = "orders.api.apps:v2"
 status = "stable"

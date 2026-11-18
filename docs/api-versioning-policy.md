@@ -24,11 +24,14 @@ services/<svc>/
     └── api/
         ├── v1/schemas.py      # pydantic models = the v1 contract
         ├── v1/mappers.py      # domain -> v1 translation (absorbs internal churn)
-        └── v1/routes.py
+        ├── routes.py          # every handler, tagged with the versions it serves
+        └── apps.py            # one app per version, built from those tags
 ```
 
 * Each major version is mounted at its own prefix (`/v1`, `/v2`) and has its own
   OpenAPI document and docs page.
+* Handlers are shared. Tags say which versions each one serves, and an `if version == ...`
+  picks the schema or mapper where versions differ. See [tagged-handlers.md](tagged-handlers.md).
 * Contract models (`api/vN/schemas.py`) are **separate from** domain models.
   Never return a domain object or ORM model directly; map it explicitly.
 * The committed `openapi/*.json` is the contract. Review it like code.
@@ -83,17 +86,18 @@ Change `domain/` freely and update the mappers. If `make openapi` produces no di
 and the golden tests pass, consumers can't tell anything changed.
 
 **...make a breaking change**
-1. Add `api/vN+1/` containing **only the endpoints that change**. Finish its router with
-   `inherit_routes(router, vN_router)` so every other endpoint reuses vN's handlers and
-   schemas unchanged. Register it in `api-versions.toml` as `beta`. No copy-paste, and
-   `main.py` mounts it automatically.
-   ([Demo PR #6](https://github.com/sspeaks/api-versioning-demo/pull/6) is a whole v3 in about 60 lines.)
+1. Register `vN+1` in `api-versions.toml` as `beta` and add its line to `api/apps.py`.
+   Every handler without an `until=` tag serves it automatically. Then tag only what
+   changes: a new parameter gets `since("vN+1")`, a new response shape gets a `"vN+1"`
+   entry in `response_model`, and a new request body gets its own handler with
+   `since="vN+1"` (and `until="vN"` on the old one).
+   ([Demo PR #9](https://github.com/sspeaks/api-versioning-demo/pull/9) is a whole v3 this way.)
 2. Iterate while it's `beta`; breaking changes are allowed.
 3. Promote it to `stable` when consumers are ready to adopt it.
 4. Mark the old version `deprecated` with a `sunset` date at least 90 days out.
-5. After the sunset date, delete `api/vN`, its spec, and its registry entry. If a newer
-   version still inherits routes from it, move those handlers into the newer version
-   first. Its spec won't change, so the drift and breaking-change gates confirm that the move was safe.
+5. After the sunset date, delete `api/vN/`, its spec, its registry entry and its line in
+   `api/apps.py`, then every tag and `if` that mentions it. A test fails until
+   `routes.py` no longer mentions the removed version.
 
 **...break a stable version anyway (emergency only)**
 For example, a security fix that cannot be made additive. Get API-owner sign-off,

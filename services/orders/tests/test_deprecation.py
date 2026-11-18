@@ -1,4 +1,4 @@
-from orders.api import v1, v2
+from orders.api.apps import v1, v2
 
 
 def test_deprecated_version_sends_deprecation_headers(client):
@@ -15,13 +15,13 @@ def test_stable_version_has_no_deprecation_headers(client):
 
 
 def test_deprecated_version_is_marked_in_the_spec():
-    for path_item in v1.app.openapi()["paths"].values():
+    for path_item in v1.openapi()["paths"].values():
         for operation in path_item.values():
             assert operation["deprecated"] is True
             assert operation["x-sunset"] == "2027-06-30"
 
 
 def test_stable_version_is_not_marked_deprecated():
-    for path_item in v2.app.openapi()["paths"].values():
+    for path_item in v2.openapi()["paths"].values():
         for operation in path_item.values():
             assert "deprecated" not in operation
