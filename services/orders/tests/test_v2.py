@@ -43,3 +43,7 @@ def test_create_order_unknown_customer(client):
     )
     assert resp.status_code == 400
     assert resp.json() == {"detail": "unknown customer_id"}
+
+
+def test_item_count(client):
+    assert client.get("/v2/orders/1").json()["item_count"] == 3

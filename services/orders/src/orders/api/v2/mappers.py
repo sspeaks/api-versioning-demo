@@ -24,6 +24,7 @@ def order_to_v2(order: Order) -> schemas.Order:
             )
             for line in order.lines
         ],
+        item_count=sum(line.quantity for line in order.lines),
         total=money(order.total, order.currency),
         status=order.status.value,
         created_at=order.created_at,
