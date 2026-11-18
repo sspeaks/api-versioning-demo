@@ -6,8 +6,6 @@ Copy fields explicitly; never ``model_validate(domain_obj)`` the whole thing.
 
 from __future__ import annotations
 
-from decimal import Decimal
-
 from orders.api.v1 import schemas
 from orders.domain.models import Order, OrderStatus
 
@@ -21,15 +19,11 @@ _STATUS = {
 }
 
 
-def to_cents(amount: Decimal) -> int:
-    return int((amount * 100).to_integral_value())
-
-
 def order_to_v1(order: Order) -> schemas.Order:
     return schemas.Order(
         id=order.id,
-        customer_name=order.customer.name,
-        items=[schemas.OrderItem(sku=line.sku, qty=line.quantity) for line in order.lines],
-        total_cents=to_cents(order.total),
+        customer_name=order.customer.display_name,
+        items=[schemas.OrderItem(sku=item.sku, qty=item.quantity) for item in order.line_items],
+        total_cents=order.total_cents,
         status=_STATUS[order.status],
     )
