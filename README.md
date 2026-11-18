@@ -7,7 +7,9 @@
 > [Cadwyn](https://github.com/zmievsa/cadwyn) (Stripe-style versioning).
 > The same CI gates prove that the result is non-breaking for v1 and v2 consumers.
 > **Read [docs/single-source-versioning.md](docs/single-source-versioning.md)** for the
-> walkthrough and the trade-offs against `main`. The demo PRs below target `main`'s layout.
+> walkthrough and the trade-offs against `main`, and
+> [PR #8](https://github.com/sspeaks/api-versioning-demo/pull/8) for what a breaking
+> change (v3) looks like here. The demo PRs #1–#5 target `main`'s layout.
 
 A small monorepo-shaped example of how to **stabilize public APIs** so external
 consumers can rely on them while the code behind them keeps changing fast.

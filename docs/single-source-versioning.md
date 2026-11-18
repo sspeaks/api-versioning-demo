@@ -82,7 +82,7 @@ now serves every version.
 | Task | `main` (separate modules) | This branch (single source) |
 |---|---|---|
 | Add an optional field | Edit `api/v2/schemas.py`. Only v2 gets it | Edit `api/schemas.py`. **Every** version gets it, unless a version change says `.didnt_exist` |
-| Breaking change | New `api/v3/` with the changed endpoints (+ `inherit_routes`), see [PR #6](https://github.com/sspeaks/api-versioning-demo/pull/6) | Edit the latest code, then add one `VersionChange` describing how v2 differed |
+| Breaking change | New `api/v3/` with the changed endpoints (+ `inherit_routes`), see [PR #6](https://github.com/sspeaks/api-versioning-demo/pull/6) | Edit the latest code, then add one `VersionChange` describing how v2 differed, see [PR #8](https://github.com/sspeaks/api-versioning-demo/pull/8) |
 | Fix a bug | Fix it in each version's handler that has it | Fix it once; every version gets the fix |
 | Delete a version after sunset | Delete `api/v1/` | Delete `Version("v1")` and the changes that describe it |
 | Refactor internals | Update each version's mapper | Update the one mapper |

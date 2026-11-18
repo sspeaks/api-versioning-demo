@@ -90,7 +90,8 @@ and the golden tests pass, consumers can't tell anything changed.
    a `VersionChange` that describes how to go *back*: what the old contract looked like,
    plus the request and response migrations between the shapes. List it under a new
    `Version("vN+1", ...)` and register `vN+1` in `api-versions.toml` as `beta`.
-   See [docs/single-source-versioning.md](single-source-versioning.md).
+   See [docs/single-source-versioning.md](single-source-versioning.md), and
+   [demo PR #8](https://github.com/sspeaks/api-versioning-demo/pull/8) for a whole v3 this way.
 2. Iterate while it's `beta`; breaking changes are allowed.
 3. Promote it to `stable` when consumers are ready to adopt it.
 4. Mark the old version `deprecated` with a `sunset` date at least 90 days out.
