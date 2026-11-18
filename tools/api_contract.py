@@ -390,6 +390,35 @@ def tidy_changelog(markdown: str) -> str:
     return "\n".join(lines).strip()
 
 
+def version_key(version: str) -> int:
+    """Sort v2 < v10 (lexicographic order would not)."""
+    digits = "".join(ch for ch in version if ch.isdigit())
+    return int(digits) if digits else 0
+
+
+def new_version_section(
+    service: Service, version: str, base_registry: dict, head_registry: dict
+) -> str:
+    """Describe a brand-new version as a diff against the version it builds on."""
+    status = head_registry[version]["status"]
+    title = f"#### `{service.name}` {version}\n🆕 New version (`{status}`)."
+    older = [
+        v for v in base_registry if v in head_registry and version_key(v) < version_key(version)
+    ]
+    if not older:
+        return title
+    previous = max(older, key=version_key)
+    proc = run_oasdiff(
+        "changelog",
+        (ROOT / service.spec_path(previous)).read_text(),
+        service.spec_path(version),
+        "--format",
+        "markdown",
+    )
+    body = tidy_changelog(proc.stdout) or "_Identical to the previous version._"
+    return f"{title} Differences from `{previous}`:\n\n{body}"
+
+
 def cmd_changelog(args: argparse.Namespace) -> int:
     sections: list[str] = []
     for service in discover_services():
@@ -399,8 +428,7 @@ def cmd_changelog(args: argparse.Namespace) -> int:
         for version in sorted(set(base_registry) | set(head_registry)):
             title = f"#### `{service.name}` {version}"
             if version not in base_registry:
-                status = head_registry[version]["status"]
-                sections.append(f"{title}\n🆕 New version (`{status}`).")
+                sections.append(new_version_section(service, version, base_registry, head_registry))
                 continue
             if version not in head_registry:
                 sections.append(f"{title}\n🗑️ Version removed.")

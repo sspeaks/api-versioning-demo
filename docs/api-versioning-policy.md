@@ -83,12 +83,17 @@ Change `domain/` freely and update the mappers. If `make openapi` produces no di
 and the golden tests pass, consumers can't tell anything changed.
 
 **...make a breaking change**
-1. Add a new version: copy `api/vN` to `api/vN+1`, make the change there, and register it in
-   `api-versions.toml` as `beta`.
+1. Add `api/vN+1/` containing **only the endpoints that change**. Finish its router with
+   `inherit_routes(router, vN_router)` so every other endpoint reuses vN's handlers and
+   schemas unchanged. Register it in `api-versions.toml` as `beta`. No copy-paste, and
+   `main.py` mounts it automatically.
+   ([Demo PR #6](https://github.com/sspeaks/api-versioning-demo/pull/6) is a whole v3 in about 60 lines.)
 2. Iterate while it's `beta`; breaking changes are allowed.
 3. Promote it to `stable` when consumers are ready to adopt it.
 4. Mark the old version `deprecated` with a `sunset` date at least 90 days out.
-5. After the sunset date, delete `api/vN`, its spec, and its registry entry.
+5. After the sunset date, delete `api/vN`, its spec, and its registry entry. If a newer
+   version still inherits routes from it, move those handlers into the newer version
+   first. Its spec won't change, so the drift and breaking-change gates confirm that the move was safe.
 
 **...break a stable version anyway (emergency only)**
 For example, a security fix that cannot be made additive. Get API-owner sign-off,

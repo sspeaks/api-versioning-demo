@@ -14,7 +14,8 @@ from email.utils import format_datetime
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, FastAPI, Request
+from fastapi.routing import APIRoute
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -30,6 +31,7 @@ Status = Literal["beta", "stable", "deprecated"]
 @dataclass(frozen=True)
 class VersionInfo:
     name: str
+    app: str  # import path of the version's FastAPI app, e.g. "orders.api.v1:app"
     status: Status
     sunset: date | None = None
     successor: str | None = None
@@ -40,6 +42,7 @@ def load_registry(path: Path = REGISTRY_PATH) -> dict[str, VersionInfo]:
     return {
         name: VersionInfo(
             name=name,
+            app=cfg["app"],
             status=cfg["status"],
             sunset=date.fromisoformat(cfg["sunset"]) if "sunset" in cfg else None,
             successor=cfg.get("successor"),
@@ -117,3 +120,28 @@ def _mark_spec_deprecated(app: FastAPI, info: VersionInfo) -> None:
         return app.openapi_schema
 
     app.openapi = openapi
+
+
+def inherit_routes(router: APIRouter, previous: APIRouter) -> APIRouter:
+    """Make ``router`` serve every endpoint of ``previous`` that it doesn't redefine.
+
+    A new major version usually changes one or two endpoints. Define only those on
+    the new router, then call this *last* to reuse the previous version's handlers
+    and schemas for everything else, with no copy-paste.
+
+    Sharing is safe because CI checks each version's spec independently: if a later
+    edit to a shared schema would break the previous (stable) version, its gate fails.
+    """
+    overridden = {
+        (route.path, method)
+        for route in router.routes
+        if isinstance(route, APIRoute)
+        for method in route.methods
+    }
+    for route in previous.routes:
+        if isinstance(route, APIRoute) and any(
+            (route.path, m) in overridden for m in route.methods
+        ):
+            continue
+        router.routes.append(route)
+    return router
