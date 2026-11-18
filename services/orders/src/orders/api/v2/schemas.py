@@ -43,6 +43,7 @@ class Order(BaseModel):
     id: int
     customer: CustomerRef
     items: list[OrderItem]
+    item_count: int = Field(description="Total number of units across all items.")
     total: Money
     status: Literal["pending", "paid", "shipped", "cancelled"]
     created_at: datetime
