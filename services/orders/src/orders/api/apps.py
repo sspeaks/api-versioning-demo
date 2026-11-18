@@ -18,3 +18,4 @@ def version_app(version: str, description: str) -> FastAPI:
 
 v1 = version_app("v1", "The original orders API. Frozen: additive changes only.")
 v2 = version_app("v2", "Current orders API. Structured customer and money types, paginated lists.")
+v3 = version_app("v3", "v2, plus required idempotency keys when creating orders.")

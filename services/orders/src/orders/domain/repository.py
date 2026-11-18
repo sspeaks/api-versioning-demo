@@ -26,6 +26,7 @@ class OrderRepository:
     def __init__(self) -> None:
         self._customers: dict[int, Customer] = {}
         self._orders: dict[int, Order] = {}
+        self._idempotency_keys: dict[str, int] = {}
         self._seed()
 
     # -- customers ---------------------------------------------------------
@@ -54,7 +55,14 @@ class OrderRepository:
     def get_order(self, order_id: int) -> Order | None:
         return self._orders.get(order_id)
 
-    def create_order(self, customer: Customer, items: list[tuple[str, int]]) -> Order:
+    def create_order(
+        self,
+        customer: Customer,
+        items: list[tuple[str, int]],
+        idempotency_key: str | None = None,
+    ) -> Order:
+        if idempotency_key in self._idempotency_keys:
+            return self._orders[self._idempotency_keys[idempotency_key]]
         lines = []
         for sku, quantity in items:
             if sku not in CATALOG:
@@ -69,6 +77,8 @@ class OrderRepository:
             created_at=datetime.now(timezone.utc),
         )
         self._orders[order.id] = order
+        if idempotency_key:
+            self._idempotency_keys[idempotency_key] = order.id
         return order
 
     # -- seed data ---------------------------------------------------------
