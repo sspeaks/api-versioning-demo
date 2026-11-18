@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 from typing import Literal
+from uuid import uuid4
 
 from cadwyn import (
     HeadVersion,
@@ -35,6 +36,7 @@ from cadwyn import (
 from pydantic import Field
 
 from orders.api.schemas import (
+    CreateOrderHeaders,
     CreateOrderItem,
     CreateOrderRequest,
     ListOrdersParams,
@@ -198,11 +200,31 @@ class ListBecamePaginated(VersionChangeWithSideEffects):
 
 
 # --------------------------------------------------------------------------- #
+# v2 -> v3
+# --------------------------------------------------------------------------- #
+class CreateOrderRequiresIdempotencyKey(VersionChange):
+    description = (
+        "`POST /orders` requires an `Idempotency-Key` header, so a client that retries "
+        "after a timeout can't create a duplicate order."
+    )
+    instructions_to_migrate_to_previous_version = (
+        schema(CreateOrderHeaders).field("idempotency_key").didnt_exist,
+    )
+
+    @convert_request_to_next_version_for("/{api_version}/orders", ["POST"])
+    def give_each_v2_request_its_own_key(request: RequestInfo) -> None:
+        # The latest handler always gets a key. v2 never deduplicated retries, so
+        # each v2 request gets a fresh one, which keeps that behavior.
+        request.headers["Idempotency-Key"] = f"v2-{uuid4()}"
+
+
+# --------------------------------------------------------------------------- #
 # Newest first. Each version lists the changes that it introduced.
 # Must match the versions in api-versions.toml (a test checks this).
 # --------------------------------------------------------------------------- #
 versions = VersionBundle(
     HeadVersion(),
+    Version("v3", CreateOrderRequiresIdempotencyKey),
     Version(
         "v2",
         CustomerBecameAnObject,
