@@ -1,6 +1,6 @@
 {
   "id": 1,
-  "customer_name": "Ada Lovelace",
+  "customer": "Ada Lovelace",
   "items": [
     {
       "sku": "WIDGET-1",

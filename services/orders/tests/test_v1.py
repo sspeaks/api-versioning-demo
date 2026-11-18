@@ -6,7 +6,7 @@ def test_list_orders_is_a_bare_array(client):
 
 def test_get_order(client):
     body = client.get("/v1/orders/1").json()
-    assert body["customer_name"] == "Ada Lovelace"
+    assert body["customer"] == "Ada Lovelace"
     assert body["total_cents"] == 3048
     assert body["items"] == [{"sku": "WIDGET-1", "qty": 2}, {"sku": "GADGET-7", "qty": 1}]
 
@@ -18,7 +18,7 @@ def test_paid_is_reported_as_pending_to_v1_clients(client):
 
 def test_internal_fields_never_leak(client):
     body = client.get("/v1/orders/2").json()
-    assert set(body) == {"id", "customer_name", "items", "total_cents", "status"}
+    assert set(body) == {"id", "customer", "items", "total_cents", "status"}
 
 
 def test_not_found(client):

@@ -22,7 +22,7 @@ class OrderItem(BaseModel):
 
 class Order(BaseModel):
     id: int
-    customer_name: str
+    customer: str
     items: list[OrderItem]
     total_cents: int = Field(description="Order total in US cents.", examples=[3048])
     status: Literal["pending", "shipped", "cancelled"]

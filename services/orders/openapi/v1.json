@@ -52,8 +52,8 @@
       },
       "Order": {
         "properties": {
-          "customer_name": {
-            "title": "Customer Name",
+          "customer": {
+            "title": "Customer",
             "type": "string"
           },
           "id": {
@@ -87,7 +87,7 @@
         },
         "required": [
           "id",
-          "customer_name",
+          "customer",
           "items",
           "total_cents",
           "status"

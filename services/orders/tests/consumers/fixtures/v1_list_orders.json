@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "customer_name": "Ada Lovelace",
+    "customer": "Ada Lovelace",
     "items": [
       {
         "sku": "WIDGET-1",
@@ -17,7 +17,7 @@
   },
   {
     "id": 2,
-    "customer_name": "Alan Turing",
+    "customer": "Alan Turing",
     "items": [
       {
         "sku": "GIZMO-3",
@@ -29,7 +29,7 @@
   },
   {
     "id": 3,
-    "customer_name": "Ada Lovelace",
+    "customer": "Ada Lovelace",
     "items": [
       {
         "sku": "GADGET-7",
