@@ -28,7 +28,7 @@ def to_cents(amount: Decimal) -> int:
 def order_to_v1(order: Order) -> schemas.Order:
     return schemas.Order(
         id=order.id,
-        customer_name=order.customer.name,
+        customer=order.customer.name,
         items=[schemas.OrderItem(sku=line.sku, qty=line.quantity) for line in order.lines],
         total_cents=to_cents(order.total),
         status=_STATUS[order.status],
