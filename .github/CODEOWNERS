@@ -1,0 +1,11 @@
+# Public API contracts need sign-off from API owners.
+# Code under src/ can change freely, but the moment a PR changes a committed
+# contract or a version's lifecycle, these owners are automatically requested.
+#
+# In a real org this would be a team, e.g. @your-org/api-guild.
+
+/services/*/openapi/            @sspeaks
+/services/*/api-versions.toml   @sspeaks
+/services/*/tests/consumers/    @sspeaks
+/tools/api_contract.py          @sspeaks
+/docs/api-versioning-policy.md  @sspeaks

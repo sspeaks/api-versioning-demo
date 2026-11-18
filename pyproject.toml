@@ -1,0 +1,39 @@
+# Monorepo root. Each service under services/* is its own uv workspace member,
+# the same way a real monorepo would hold many independently-owned services.
+[project]
+name = "api-versioning-demo"
+version = "0.0.0"
+requires-python = ">=3.10"
+dependencies = ["orders"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+    "httpx>=0.27",  # required by fastapi.testclient
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+orders = { workspace = true }
+
+[tool.uv.workspace]
+members = ["services/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["orders", "api_contract"]
+
+[tool.pytest.ini_options]
+testpaths = ["services", "tools"]
+pythonpath = ["tools"]
+addopts = "--import-mode=importlib"
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient`"]

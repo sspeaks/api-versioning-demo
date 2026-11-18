@@ -1,0 +1,310 @@
+{
+  "components": {
+    "schemas": {
+      "CreateOrderRequest": {
+        "properties": {
+          "customer_name": {
+            "minLength": 1,
+            "title": "Customer Name",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            },
+            "minItems": 1,
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "customer_name",
+          "items"
+        ],
+        "title": "CreateOrderRequest",
+        "type": "object"
+      },
+      "Error": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ],
+        "title": "Error",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "Order": {
+        "properties": {
+          "customer_name": {
+            "title": "Customer Name",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "shipped",
+              "cancelled"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "total_cents": {
+            "description": "Order total in US cents.",
+            "examples": [
+              3048
+            ],
+            "title": "Total Cents",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "customer_name",
+          "items",
+          "total_cents",
+          "status"
+        ],
+        "title": "Order",
+        "type": "object"
+      },
+      "OrderItem": {
+        "properties": {
+          "qty": {
+            "examples": [
+              2
+            ],
+            "minimum": 1.0,
+            "title": "Qty",
+            "type": "integer"
+          },
+          "sku": {
+            "examples": [
+              "WIDGET-1"
+            ],
+            "title": "Sku",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sku",
+          "qty"
+        ],
+        "title": "OrderItem",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "The original orders API. Frozen: additive changes only.\n\n**Lifecycle:** `deprecated`, sunset on **2027-06-30**, migrate to [`v2`](/v2/docs)",
+    "title": "Orders API",
+    "version": "v1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/orders": {
+      "get": {
+        "deprecated": true,
+        "operationId": "listOrders",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Order"
+                  },
+                  "title": "Response Listorders",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Orders",
+        "tags": [
+          "orders"
+        ],
+        "x-sunset": "2027-06-30"
+      },
+      "post": {
+        "deprecated": true,
+        "operationId": "createOrder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Order",
+        "tags": [
+          "orders"
+        ],
+        "x-sunset": "2027-06-30"
+      }
+    },
+    "/orders/{order_id}": {
+      "get": {
+        "deprecated": true,
+        "operationId": "getOrder",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "title": "Order Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Order",
+        "tags": [
+          "orders"
+        ],
+        "x-sunset": "2027-06-30"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/v1"
+    }
+  ]
+}

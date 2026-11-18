@@ -1,0 +1,16 @@
+{
+  "id": 1,
+  "customer_name": "Ada Lovelace",
+  "items": [
+    {
+      "sku": "WIDGET-1",
+      "qty": 2
+    },
+    {
+      "sku": "GADGET-7",
+      "qty": 1
+    }
+  ],
+  "total_cents": 3048,
+  "status": "shipped"
+}

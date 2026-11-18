@@ -1,0 +1,23 @@
+# Registry of this service's public API versions.
+#
+# This file is the single source of truth for versioning policy. It is read by:
+#   * the service itself  -> adds Deprecation / Sunset headers at runtime
+#   * tools/api_contract.py -> decides what CI is allowed to change
+#
+# status:
+#   beta        Not yet promised to anyone. Breaking changes are allowed.
+#   stable      Promised to consumers. Additive changes only; breaking changes fail CI.
+#   deprecated  Still frozen like stable, but scheduled for removal on `sunset`.
+#               The spec may only be deleted once the sunset date has passed.
+#
+# Changes to this file require API-owner review (see .github/CODEOWNERS).
+
+[versions.v1]
+app = "orders.api.v1:app"
+status = "deprecated"
+sunset = "2027-06-30"
+successor = "v2"
+
+[versions.v2]
+app = "orders.api.v2:app"
+status = "stable"
