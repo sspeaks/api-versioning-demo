@@ -21,3 +21,7 @@ successor = "v2"
 [versions.v2]
 app = "orders.api.v2:app"
 status = "stable"
+
+[versions.v3]
+app = "orders.api.v3:app"
+status = "beta"
