@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from decimal import Decimal
 from enum import Enum
 
 
@@ -22,22 +21,22 @@ class OrderStatus(str, Enum):
 @dataclass
 class Customer:
     id: int
-    name: str
+    display_name: str
     email: str  # PII: deliberately not exposed by any API version
 
 
 @dataclass
-class OrderLine:
+class LineItem:
     sku: str
     quantity: int
-    unit_price: Decimal
+    unit_price_cents: int  # money is stored as integer minor units now, not Decimal
 
 
 @dataclass
 class Order:
     id: int
     customer: Customer
-    lines: list[OrderLine]
+    line_items: list[LineItem]
     currency: str
     status: OrderStatus
     created_at: datetime
@@ -47,5 +46,5 @@ class Order:
     tags: list[str] = field(default_factory=list)
 
     @property
-    def total(self) -> Decimal:
-        return sum((line.unit_price * line.quantity for line in self.lines), Decimal("0"))
+    def total_cents(self) -> int:
+        return sum(item.unit_price_cents * item.quantity for item in self.line_items)
