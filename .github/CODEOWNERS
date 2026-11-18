@@ -7,5 +7,6 @@
 /services/*/openapi/            @sspeaks
 /services/*/api-versions.toml   @sspeaks
 /services/*/tests/consumers/    @sspeaks
+/services/*/src/*/api/versions.py @sspeaks
 /tools/api_contract.py          @sspeaks
 /docs/api-versioning-policy.md  @sspeaks

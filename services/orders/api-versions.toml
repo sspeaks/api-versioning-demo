@@ -10,14 +10,19 @@
 #   deprecated  Still frozen like stable, but scheduled for removal on `sunset`.
 #               The spec may only be deleted once the sunset date has passed.
 #
+# One Cadwyn app serves every version. `openapi_url` tells tools/api_contract.py
+# where each version's document is. How versions differ is in orders/api/versions.py.
+#
 # Changes to this file require API-owner review (see .github/CODEOWNERS).
 
 [versions.v1]
-app = "orders.api.v1:app"
+app = "orders.main:app"
+openapi_url = "/openapi.json?version=v1"
 status = "deprecated"
 sunset = "2027-06-30"
 successor = "v2"
 
 [versions.v2]
-app = "orders.api.v2:app"
+app = "orders.main:app"
+openapi_url = "/openapi.json?version=v2"
 status = "stable"

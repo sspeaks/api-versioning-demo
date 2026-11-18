@@ -96,19 +96,29 @@ def load_registry(service: Service) -> dict[str, dict]:
     return parse_registry((ROOT / service.registry_path).read_text())
 
 
-def render_spec(app_ref: str) -> str:
-    """Import ``module:attr`` and return its OpenAPI document as canonical JSON."""
-    module_name, _, attr = app_ref.partition(":")
+def render_spec(cfg: dict) -> str:
+    """Import the version's app and return its OpenAPI document as canonical JSON.
+
+    ``app = "module:attr"`` names the app. If one app serves several versions
+    (e.g. Cadwyn), ``openapi_url`` says where this version's document is served,
+    and it is fetched in-process.
+    """
+    module_name, _, attr = cfg["app"].partition(":")
     app = getattr(importlib.import_module(module_name), attr)
-    return json.dumps(app.openapi(), indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    if "openapi_url" in cfg:
+        from fastapi.testclient import TestClient
+
+        response = TestClient(app).get(cfg["openapi_url"])
+        response.raise_for_status()
+        spec = response.json()
+    else:
+        spec = app.openapi()
+    return json.dumps(spec, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
 
 
 def render_service(service: Service) -> dict[str, str]:
     """Return {"v1.json": "<spec>", ...} for every version in the registry."""
-    return {
-        f"{version}.json": render_spec(cfg["app"])
-        for version, cfg in load_registry(service).items()
-    }
+    return {f"{version}.json": render_spec(cfg) for version, cfg in load_registry(service).items()}
 
 
 def committed_specs(service: Service) -> dict[str, str]:

@@ -1,14 +1,11 @@
-"""Orders API v2 - public contract.
+"""Orders API contract: the LATEST version only.
 
-v2 exists because these changes could not be made to v1 without breaking callers:
+There is no ``v1/schemas.py``. Older versions are generated from these models
+by the version changes in ``orders.api.versions``, which describe, one breaking
+change at a time, how each older version differed.
 
-* ``customer_name: str``  -> ``customer: {id, name}``
-* ``total_cents: int``    -> ``total: {amount: "12.34", currency: "USD"}``
-* list endpoint returns a page object instead of a bare array
-* ``status`` gains ``"paid"``
-* ``qty`` is spelled ``quantity``
-
-Everything here is published in ``services/orders/openapi/v2.json`` and guarded by CI.
+Everything here is published in ``openapi/v2.json``; the generated older
+shapes are published in ``openapi/v1.json``. CI guards both.
 """
 
 from __future__ import annotations
@@ -48,6 +45,13 @@ class Order(BaseModel):
     created_at: datetime
 
 
+class ListOrdersParams(BaseModel):
+    """Query parameters of GET /orders."""
+
+    limit: int = Field(20, ge=1, le=100)
+    cursor: str | None = Field(None, description="Opaque cursor from a previous page.")
+
+
 class OrderPage(BaseModel):
     items: list[Order]
     next_cursor: str | None = Field(
@@ -56,8 +60,8 @@ class OrderPage(BaseModel):
 
 
 class CreateOrderItem(BaseModel):
-    sku: str
-    quantity: int = Field(ge=1)
+    sku: str = Field(examples=["WIDGET-1"])
+    quantity: int = Field(ge=1, examples=[2])
 
 
 class CreateOrderRequest(BaseModel):

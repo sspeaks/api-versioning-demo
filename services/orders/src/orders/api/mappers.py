@@ -1,10 +1,13 @@
-"""Translate internal domain objects into the v2 contract."""
+"""Translate internal domain objects into the latest contract.
+
+Only one mapper per resource: Cadwyn derives older versions from its output.
+"""
 
 from __future__ import annotations
 
 from decimal import Decimal
 
-from orders.api.v2 import schemas
+from orders.api import schemas
 from orders.domain.models import Order
 
 
@@ -12,7 +15,7 @@ def money(amount: Decimal, currency: str) -> schemas.Money:
     return schemas.Money(amount=f"{amount:.2f}", currency=currency)
 
 
-def order_to_v2(order: Order) -> schemas.Order:
+def order_to_api(order: Order) -> schemas.Order:
     return schemas.Order(
         id=order.id,
         customer=schemas.CustomerRef(id=order.customer.id, name=order.customer.name),

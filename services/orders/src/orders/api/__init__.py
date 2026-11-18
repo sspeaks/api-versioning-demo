@@ -1,1 +1,5 @@
-"""Public API layer. Each sub-package is one frozen, versioned contract."""
+"""Public API layer, written once in the latest shape.
+
+schemas.py / routes.py / mappers.py  -> the latest version
+versions.py                          -> how every older version differs
+"""

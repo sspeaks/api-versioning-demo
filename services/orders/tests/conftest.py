@@ -1,21 +1,17 @@
 import pytest
 from fastapi.testclient import TestClient
-from starlette.routing import Mount
 
-from orders.domain.repository import OrderRepository, get_repository
+from orders.domain import repository
 from orders.main import app
-
-# Every mounted version sub-app (/v1, /v2, ...), discovered so new versions need no test plumbing.
-VERSION_APPS = [route.app for route in app.routes if isinstance(route, Mount)]
 
 
 @pytest.fixture
-def client():
-    """Client for the root app, with a fresh in-memory store per test."""
-    repo = OrderRepository()
-    for version_app in VERSION_APPS:
-        version_app.dependency_overrides[get_repository] = lambda: repo
+def client(monkeypatch):
+    """Client for the app, with a fresh in-memory store per test.
+
+    Patches the module-level store instead of using dependency_overrides, because
+    v1's request migration (orders.api.versions) also looks customers up in it.
+    """
+    monkeypatch.setattr(repository, "_repo", repository.OrderRepository())
     with TestClient(app) as c:
         yield c
-    for version_app in VERSION_APPS:
-        version_app.dependency_overrides.clear()

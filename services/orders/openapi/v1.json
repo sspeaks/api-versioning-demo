@@ -1,6 +1,31 @@
 {
   "components": {
     "schemas": {
+      "CreateOrderItem": {
+        "properties": {
+          "qty": {
+            "examples": [
+              2
+            ],
+            "minimum": 1.0,
+            "title": "Qty",
+            "type": "integer"
+          },
+          "sku": {
+            "examples": [
+              "WIDGET-1"
+            ],
+            "title": "Sku",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sku",
+          "qty"
+        ],
+        "title": "CreateOrderItem",
+        "type": "object"
+      },
       "CreateOrderRequest": {
         "properties": {
           "customer_name": {
@@ -10,7 +35,7 @@
           },
           "items": {
             "items": {
-              "$ref": "#/components/schemas/OrderItem"
+              "$ref": "#/components/schemas/CreateOrderItem"
             },
             "minItems": 1,
             "title": "Items",
@@ -18,8 +43,8 @@
           }
         },
         "required": [
-          "customer_name",
-          "items"
+          "items",
+          "customer_name"
         ],
         "title": "CreateOrderRequest",
         "type": "object"
@@ -87,10 +112,10 @@
         },
         "required": [
           "id",
-          "customer_name",
           "items",
-          "total_cents",
-          "status"
+          "status",
+          "customer_name",
+          "total_cents"
         ],
         "title": "Order",
         "type": "object"
@@ -163,7 +188,7 @@
     }
   },
   "info": {
-    "description": "The original orders API. Frozen: additive changes only.\n\n**Lifecycle:** `deprecated`, sunset on **2027-06-30**, migrate to [`v2`](/v2/docs)",
+    "description": "**Lifecycle:** `deprecated`, sunset on **2027-06-30**, migrate to [`v2`](/docs?version=v2)",
     "title": "Orders API",
     "version": "v1"
   },
@@ -187,6 +212,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "List Orders",

@@ -1,5 +1,14 @@
 # API versioning demo: FastAPI + pydantic + CI enforcement
 
+> **🌿 You're on the `alt/single-source-cadwyn` branch.** It serves the *same* v1 and v2
+> APIs as `main`, but every version is generated from **one** set of schemas and routes.
+> The differences between versions all live in
+> [`api/versions.py`](services/orders/src/orders/api/versions.py), using
+> [Cadwyn](https://github.com/zmievsa/cadwyn) (Stripe-style versioning).
+> The same CI gates prove that the result is non-breaking for v1 and v2 consumers.
+> **Read [docs/single-source-versioning.md](docs/single-source-versioning.md)** for the
+> walkthrough and the trade-offs against `main`. The demo PRs below target `main`'s layout.
+
 A small monorepo-shaped example of how to **stabilize public APIs** so external
 consumers can rely on them while the code behind them keeps changing fast.
 
@@ -15,7 +24,7 @@ that churn. A rename in a pydantic model is one line for us and an outage for th
    code and **committed** (`services/orders/openapi/v1.json`), so every contract
    change is a visible, reviewable diff.
 2. **The contract is not the domain.** Public pydantic schemas live in
-   `api/vN/schemas.py`. Internal models live in `domain/`. Small **mappers** translate
+   `api/schemas.py`. Internal models live in `domain/`. Small **mappers** translate
    between them, so internals can change freely without consumers noticing.
 3. **CI enforces the promise.** A PR that breaks a `stable` version fails, and the
    fix is to ship the change in a new version.
@@ -102,8 +111,8 @@ Try breaking something yourself:
 
 ```bash
 git switch -c try-it
-sed -i 's/customer_name: str$/customer: str/' services/orders/src/orders/api/v1/schemas.py
-make openapi && make breaking     # ❌ response-required-property-removed ...
+sed -i 's/existed_as(type=str),$/existed_as(type=int),/' services/orders/src/orders/api/versions.py
+make openapi && make breaking     # ❌ response-property-type-changed ...
 ```
 
 ## Repo tour
@@ -115,10 +124,10 @@ make openapi && make breaking     # ❌ response-required-property-removed ...
 │   ├── openapi/{v1,v2}.json          # ⭐ committed contracts (generated, never hand-edited)
 │   ├── src/orders/
 │   │   ├── domain/                   # internal model: change freely
-│   │   ├── api/v1/{schemas,mappers,routes}.py
-│   │   ├── api/v2/{schemas,mappers,routes}.py
-│   │   ├── versioning.py             # sub-app per version, deprecation headers, x-sunset
-│   │   └── main.py                   # mounts /v1 and /v2
+│   │   ├── api/{schemas,mappers,routes}.py   # the latest version, written once
+│   │   ├── api/versions.py           # ⭐ how each older version differs (Cadwyn)
+│   │   ├── versioning.py             # registry, deprecation headers, x-sunset
+│   │   └── main.py                   # one Cadwyn app serving /v1 and /v2
 │   └── tests/consumers/              # ⭐ golden payloads that named consumers rely on
 ├── tools/api_contract.py             # ⭐ export | drift | breaking | changelog (generic, all services)
 ├── .github/workflows/ci.yml          # runs the same Makefile targets as you do locally
@@ -137,8 +146,8 @@ For a researched, cited survey of *all* the versioning approaches ranked by engi
 * **Code-first, spec committed.** The team already writes FastAPI + pydantic, so we
   don't hand-write YAML. The generated spec is still the reviewable artifact, and
   the drift gate keeps code and spec in lockstep.
-* **Each version is a FastAPI sub-app**, so each one has an isolated OpenAPI document
-  and its own `/vN/docs`.
+* **One Cadwyn app generates every version** from the latest code plus `versions.py`.
+  Each version still publishes its own OpenAPI document (`/openapi.json?version=v1`).
 * **The base branch's registry decides the rules.** A PR can't flip `stable → beta`
   to sneak a break through.
 * **Deprecated versions get `x-sunset` in the spec**, because oasdiff treats removing

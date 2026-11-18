@@ -2,12 +2,13 @@
 name = "orders"
 version = "0.1.0"
 description = "Demo orders service exposing versioned public APIs (/v1, /v2)"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115",
     "pydantic>=2.7",
     "uvicorn>=0.30",
     "tomli>=2.0; python_version < '3.11'",
+    "cadwyn>=9.0.1,<10",
 ]
 
 [build-system]

@@ -4,11 +4,17 @@
       "CreateOrderItem": {
         "properties": {
           "quantity": {
+            "examples": [
+              2
+            ],
             "minimum": 1.0,
             "title": "Quantity",
             "type": "integer"
           },
           "sku": {
+            "examples": [
+              "WIDGET-1"
+            ],
             "title": "Sku",
             "type": "string"
           }
@@ -260,7 +266,7 @@
     }
   },
   "info": {
-    "description": "Current orders API. Structured customer and money types, paginated lists.\n\n**Lifecycle:** `stable`",
+    "description": "**Lifecycle:** `stable`",
     "title": "Orders API",
     "version": "v2"
   },

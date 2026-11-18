@@ -22,14 +22,15 @@ services/<svc>/
 └── src/<svc>/
     ├── domain/                # internal: change freely
     └── api/
-        ├── v1/schemas.py      # pydantic models = the v1 contract
-        ├── v1/mappers.py      # domain -> v1 translation (absorbs internal churn)
-        └── v1/routes.py
+        ├── schemas.py         # pydantic models = the LATEST contract
+        ├── mappers.py         # domain -> latest contract (absorbs internal churn)
+        ├── routes.py          # endpoints, written once: /{api_version}/orders
+        └── versions.py        # every difference between versions (Cadwyn version changes)
 ```
 
-* Each major version is mounted at its own prefix (`/v1`, `/v2`) and has its own
-  OpenAPI document and docs page.
-* Contract models (`api/vN/schemas.py`) are **separate from** domain models.
+* One [Cadwyn](https://github.com/zmievsa/cadwyn) app serves every version at its own
+  prefix (`/v1`, `/v2`). Each version still gets its own OpenAPI document.
+* Contract models (`api/schemas.py`) are **separate from** domain models.
   Never return a domain object or ORM model directly; map it explicitly.
 * The committed `openapi/*.json` is the contract. Review it like code.
 
@@ -74,26 +75,27 @@ consumer golden tests in `services/<svc>/tests/consumers/`.
 
 ## How to...
 
-**...add a field or endpoint to an existing version**
-Change `schemas.py`/`routes.py`, run `make openapi`, commit the updated spec. CI
+**...add a field or endpoint**
+Change `schemas.py`/`routes.py`, run `make openapi`, commit the updated specs. CI
 posts the changelog on your PR, and CODEOWNERS pulls in an API owner.
+Additions reach **every** version by default. If an older version shouldn't get it,
+add `schema(Model).field("x").didnt_exist` to a version change.
 
 **...refactor internals**
 Change `domain/` freely and update the mappers. If `make openapi` produces no diff
 and the golden tests pass, consumers can't tell anything changed.
 
 **...make a breaking change**
-1. Add `api/vN+1/` containing **only the endpoints that change**. Finish its router with
-   `inherit_routes(router, vN_router)` so every other endpoint reuses vN's handlers and
-   schemas unchanged. Register it in `api-versions.toml` as `beta`. No copy-paste, and
-   `main.py` mounts it automatically.
-   ([Demo PR #6](https://github.com/sspeaks/api-versioning-demo/pull/6) is a whole v3 in about 60 lines.)
+1. Make the change in the latest `schemas.py`/`routes.py`. Then, in `versions.py`, write
+   a `VersionChange` that describes how to go *back*: what the old contract looked like,
+   plus the request and response migrations between the shapes. List it under a new
+   `Version("vN+1", ...)` and register `vN+1` in `api-versions.toml` as `beta`.
+   See [docs/single-source-versioning.md](single-source-versioning.md).
 2. Iterate while it's `beta`; breaking changes are allowed.
 3. Promote it to `stable` when consumers are ready to adopt it.
 4. Mark the old version `deprecated` with a `sunset` date at least 90 days out.
-5. After the sunset date, delete `api/vN`, its spec, and its registry entry. If a newer
-   version still inherits routes from it, move those handlers into the newer version
-   first. Its spec won't change, so the drift and breaking-change gates confirm that the move was safe.
+5. After the sunset date, delete `Version("vN")`, the version changes that only
+   existed to describe it, its spec, and its registry entry.
 
 **...break a stable version anyway (emergency only)**
 For example, a security fix that cannot be made additive. Get API-owner sign-off,
